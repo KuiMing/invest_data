@@ -1,3 +1,4 @@
+import os
 import re
 import time
 from datetime import datetime, timezone, timedelta
@@ -70,6 +71,7 @@ def pchome_stock_tick(code, date):
 def download_upload():
     code_table = stock_code()
     date = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
+    file_path = os.path.join(os.getenv("HOME"), "pchome", "pchome_{}.csv".format(date))
     count = 0
     big_table = pd.DataFrame()
     for i in code_table.code.values:
@@ -84,18 +86,13 @@ def download_upload():
         time.sleep(1)
         if count % 10 == 0:
             if count == 10:
-                big_table.to_csv("pchome_{}.csv".format(date), index=False)
+                big_table.to_csv(file_path, index=False)
             else:
-                big_table.to_csv(
-                    "pchome_{}.csv".format(date), index=False, header=False, mode="a"
-                )
-
+                big_table.to_csv(file_path, index=False, header=False, mode="a")
             big_table = pd.DataFrame()
         print(count)
     if len(big_table) > 0:
-        big_table.to_csv(
-            "pchome_{}.csv".format(date), index=False, header=False, mode="a"
-        )
+        big_table.to_csv(file_path, index=False, header=False, mode="a")
 
 
 if __name__ == "__main__":
