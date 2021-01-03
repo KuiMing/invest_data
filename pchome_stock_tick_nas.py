@@ -73,8 +73,12 @@ def download_upload():
     count = 0
     big_table = pd.DataFrame()
     for i in code_table.code.values:
-        data = pchome_stock_tick(i, date)
-        big_table = big_table.append(data)
+        print(i)
+        try:
+            data = pchome_stock_tick(i, date)
+            big_table = big_table.append(data)
+        except:
+            print("something wrong")
 
         count += 1
         time.sleep(1)
