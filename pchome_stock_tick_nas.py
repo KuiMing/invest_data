@@ -1,0 +1,97 @@
+import re
+import time
+from datetime import datetime, timezone, timedelta
+import numpy as np
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+
+
+def stock_code():
+    res = requests.get("https://isin.twse.com.tw/isin/C_public.jsp?strMode=2")
+    soup = BeautifulSoup(res.content.decode("MS950"), "html.parser")
+    table_rows = soup.find_all("tr")
+    stock = []
+    for tr in table_rows:
+        td = tr.find_all("td")
+        row = [tr.text for tr in td]
+        stock.append(row)
+    code_table = pd.DataFrame(
+        stock[2:],
+        columns=[
+            "code_name",
+            "ISINCode",
+            "date",
+            "market",
+            "industry",
+            "CFIcode",
+            "note",
+        ],
+    )
+    code_table.dropna(inplace=True)
+    code = []
+    name = []
+    for i in code_table.code_name.values:
+        code.append(i.split("\u3000")[0])
+        name.append(i.split("\u3000")[1])
+    code_table["code"] = code
+    code_table["name"] = name
+    return code_table
+
+
+def pchome_stock_tick(code, date):
+    url = "http://pchome.megatime.com.tw/stock/sto0/ock3/sid{}.html".format(code)
+    ref = "http://pchome.megatime.com.tw/stock/sto0/ock2/sid{}.html".format(code)
+    res = requests.get(url, headers={"Referer": ref})
+    html = re.findall(
+        "<table id=tb_chart cellpadding=0 cellspacing=1 style=margin-top:10px>.*</table>",
+        res.text,
+    )
+    soup = BeautifulSoup(html[0], "html.parser")
+    table = soup.find_all("td")
+    data = []
+    for i in table[7:]:
+        data.append(i.text)
+    data = np.array(data)
+    col = ["time", "bid", "ask", "price", "change", "volume", "total_volume"]
+    data = pd.DataFrame(data.reshape(int(len(data) / 7), 7), columns=col)
+    for i in col[1:]:
+        data.loc[data[i] == "--", i] = None
+        data.loc[data[i] == "市價", i] = data.loc[data[i] == "市價", "price"]
+        if i == "volume" or i == "total_volume":
+            data[i] = data[i].astype(int)
+        else:
+            data[i] = data[i].astype(float)
+    data["code"] = code
+    data["date"] = date
+    return data
+
+
+def download_upload():
+    code_table = stock_code()
+    date = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
+    count = 0
+    big_table = pd.DataFrame()
+    for i in code_table.code.values:
+        data = pchome_stock_tick(i, date)
+        big_table = big_table.append(data)
+
+        count += 1
+        time.sleep(1)
+        if count % 10 == 0:
+            dataset_ref = CLIENT.dataset("finance")
+            table_ref = dataset_ref.table("pchome_stock_tick")
+            #     table = bigquery.Table(table_ref)
+            #     table = client.create_table(table)
+            job_config = bigquery.LoadJobConfig()
+            job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
+            job_config.ignore_unknown_values = True
+            job = CLIENT.load_table_from_dataframe(
+                big_table, table_ref, job_config=job_config
+            )
+            job.result()
+        print(count)
+
+
+if __name__ == "__main__":
+    download_upload()
