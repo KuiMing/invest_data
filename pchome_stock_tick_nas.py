@@ -79,18 +79,19 @@ def download_upload():
         count += 1
         time.sleep(1)
         if count % 10 == 0:
-            dataset_ref = CLIENT.dataset("finance")
-            table_ref = dataset_ref.table("pchome_stock_tick")
-            #     table = bigquery.Table(table_ref)
-            #     table = client.create_table(table)
-            job_config = bigquery.LoadJobConfig()
-            job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
-            job_config.ignore_unknown_values = True
-            job = CLIENT.load_table_from_dataframe(
-                big_table, table_ref, job_config=job_config
-            )
-            job.result()
+            if count == 10:
+                big_table.to_csv("pchome_{}.csv".format(date), index=False)
+            else:
+                big_table.to_csv(
+                    "pchome_{}.csv".format(date), index=False, header=False, mode="a"
+                )
+
+            big_table = pd.DataFrame()
         print(count)
+    if len(big_table) > 0:
+        big_table.to_csv(
+            "pchome_{}.csv".format(date), index=False, header=False, mode="a"
+        )
 
 
 if __name__ == "__main__":
