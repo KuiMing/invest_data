@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import shioaji as sj
+from datetime import datetime
 
 
 def stock_code():
@@ -51,11 +52,9 @@ def main(person_id, passwd):
     code_table = code_table[code_table.industry != ""]
     stock_list = pd.read_csv("stock_200.csv")
     code_table = code_table[~code_table.code.isin(stock_list.code)]
-
+    date = datetime.now().strftime("%Y-%m-%d")
     for i in code_table.code.values:
-        kbars = api.kbars(
-            api.Contracts.Stocks[str(i)], start="2011-01-02", end="2020-12-31"
-        )
+        kbars = api.kbars(api.Contracts.Stocks[str(i)], start="2011-01-02", end=date)
         df = pd.DataFrame({**kbars})
         df.ts = pd.to_datetime(df.ts)
         df["code"] = i
