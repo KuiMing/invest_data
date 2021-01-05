@@ -43,7 +43,7 @@ def stock_code():
 
 def main(person_id, passwd):
     api = sj.Shioaji()
-    login = api.login(
+    api.login(
         person_id=person_id,
         passwd=passwd,
         contracts_cb=lambda security_type: print(f"{repr(security_type)} fetch done."),
@@ -55,30 +55,32 @@ def main(person_id, passwd):
     code_table = code_table[~code_table.code.isin(stock_list.code)]
     date = datetime.now().strftime("%Y-%m-%d")
     for i in code_table.code.values:
-        kbars = api.kbars(api.Contracts.Stocks[str(i)], start="2011-01-02", end=date)
-        df = pd.DataFrame({**kbars})
-        df.ts = pd.to_datetime(df.ts)
-        df["code"] = i
-        file_path = os.path.join(
-            os.getenv("HOME"), "shiaoji_history", "{}.csv".format(i)
-        )
-        df.to_csv(file_path, index=False)
-        print(i)
+        try:
+            kbars = api.kbars(
+                api.Contracts.Stocks[str(i)], start="2011-01-02", end=date
+            )
+            date_frame = pd.DataFrame({**kbars})
+            date_frame.ts = pd.to_datetime(date_frame.ts)
+            date_frame["code"] = i
+            file_path = os.path.join(
+                os.getenv("HOME"), "shioaji_history", "{}.csv".format(i)
+            )
+            date_frame.to_csv(file_path, index=False)
+        except:
+            print(i)
         time.sleep(10)
+    api.logout()
 
 
 def login_info():
-    db_name = os.getenv('DB')
+    db_name = os.getenv("DB")
     conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    cursor = c.execute("SELECT ID, PASSWORD from ACCOUNT")
-    ID, PASSWD = next(
-            row
-            for row in cursor
-            if len(row) == 2
-        )
+    cursor = conn.cursor()
+    result = cursor.execute("SELECT ID, PASSWORD from ACCOUNT")
+    person_id, password = next(row for row in result if len(row) == 2)
     conn.close()
-    return ID, PASSWD
+    return person_id, password
+
 
 if __name__ == "__main__":
     ID, PASSWD = login_info()
