@@ -76,11 +76,11 @@ def download_upload():
     count = 0
     big_table = pd.DataFrame()
     for i in code_table.code.values:
-        print(i)
         try:
             data = pchome_stock_tick(i, date)
             big_table = big_table.append(data)
         except:
+            print("count:{}, code:{}".format(count, i))
             print("something wrong")
 
         count += 1
@@ -91,7 +91,7 @@ def download_upload():
             else:
                 big_table.to_csv(file_path, index=False, header=False, mode="a")
             big_table = pd.DataFrame()
-        print(count)
+
     if len(big_table) > 0:
         big_table.to_csv(file_path, index=False, header=False, mode="a")
 
