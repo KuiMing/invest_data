@@ -36,6 +36,7 @@ def stock_code():
         code.append(i.split("\u3000")[0])
         name.append(i.split("\u3000")[1])
     code_table["code"] = code
+    code_table["code"] = code_table.code.str.replace(" ", "")
     code_table["name"] = name
     return code_table
 
