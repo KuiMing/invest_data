@@ -72,7 +72,7 @@ def login_info():
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
     cursor = c.execute("SELECT ID, PASSWORD from ACCOUNT")
-    ID, PSSWD = next(
+    ID, PASSWD = next(
             row
             for row in cursor
             if len(row) == 2
