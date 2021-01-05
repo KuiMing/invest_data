@@ -1,10 +1,11 @@
 import os
+from datetime import datetime
+import sqlite3
 import time
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import shioaji as sj
-from datetime import datetime
 
 
 def stock_code():
@@ -66,7 +67,19 @@ def main(person_id, passwd):
         time.sleep(10)
 
 
+def login_info():
+    db_name = os.getenv('DB')
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+    cursor = c.execute("SELECT ID, PASSWORD from ACCOUNT")
+    ID, PSSWD = next(
+            row
+            for row in cursor
+            if len(row) == 2
+        )
+    conn.close()
+    return ID, PASSWD
+
 if __name__ == "__main__":
-    ID = input("ID:")
-    PSSWD = input("Password:")
+    ID, PASSWD = login_info()
     main(ID, PSSWD)
