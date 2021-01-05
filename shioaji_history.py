@@ -51,8 +51,6 @@ def main(person_id, passwd):
 
     code_table = stock_code()
     code_table = code_table[code_table.industry != ""]
-    stock_list = pd.read_csv("stock_200.csv")
-    code_table = code_table[~code_table.code.isin(stock_list.code)]
     date = datetime.now().strftime("%Y-%m-%d")
     for i in code_table.code.values:
         try:
