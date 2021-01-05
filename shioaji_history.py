@@ -51,20 +51,20 @@ def main(person_id, passwd):
 
     code_table = stock_code()
     code_table = code_table[code_table.industry != ""]
-    date = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now().strftime("%Y-%m-%d")
     for i in code_table.code.values:
         try:
             kbars = api.kbars(
-                api.Contracts.Stocks[str(i)], start="2011-01-02", end=date
+                api.Contracts.Stocks[str(i)], start="2011-01-02", end=today
             )
             data_frame = pd.DataFrame({**kbars})
             data_frame.ts = pd.to_datetime(data_frame.ts)
-            date = []
+            dates = []
             times = []
             for t_s in data_frame.ts.values:
-                date.append(str(t_s).split("T")[0])
+                dates.append(str(t_s).split("T")[0])
                 times.append(str(t_s).split("T")[1].split(".")[0])
-            data_frame["Date"] = date
+            data_frame["Date"] = dates
             data_frame["Time"] = times
             data_frame = data_frame[
                 ["Date", "Time", "Open", "High", "Low", "Close", "Volume"]
