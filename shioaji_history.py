@@ -82,4 +82,4 @@ def login_info():
 
 if __name__ == "__main__":
     ID, PASSWD = login_info()
-    main(ID, PSSWD)
+    main(ID, PASSWD)
