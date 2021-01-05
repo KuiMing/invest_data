@@ -59,13 +59,22 @@ def main(person_id, passwd):
             kbars = api.kbars(
                 api.Contracts.Stocks[str(i)], start="2011-01-02", end=date
             )
-            date_frame = pd.DataFrame({**kbars})
-            date_frame.ts = pd.to_datetime(date_frame.ts)
-            date_frame["code"] = i
+            data_frame = pd.DataFrame({**kbars})
+            data_frame.ts = pd.to_datetime(data_frame.ts)
+            date = []
+            times = []
+            for t_s in data_frame.ts.values:
+                date.append(str(t_s).split("T")[0])
+                times.append(str(t_s).split("T")[1].split(".")[0])
+            data_frame["Date"] = date
+            data_frame["Time"] = times
+            data_frame = data_frame[
+                ["Date", "Time", "Open", "High", "Low", "Close", "Volume"]
+            ]
             file_path = os.path.join(
                 os.getenv("HOME"), "shioaji_history", "{}.csv".format(i)
             )
-            date_frame.to_csv(file_path, index=False)
+            data_frame.to_csv(file_path, index=False)
         except:
             print(i)
         time.sleep(10)
