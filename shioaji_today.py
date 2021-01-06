@@ -6,6 +6,8 @@ import pandas as pd
 import shioaji as sj
 from shioaji_history import stock_code, login_info
 
+os.environ["DB"] = "{}/shioaji.db".format(os.getenv("HOME"))
+
 
 def main(person_id, passwd):
     api = sj.Shioaji()
