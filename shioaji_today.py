@@ -18,7 +18,15 @@ def main(person_id, passwd):
     code_table = stock_code()
     code_table = code_table[code_table.industry != ""]
     today = datetime.now().strftime("%Y-%m-%d")
-    files = glob.glob("/Users/ben/shioaji_history/*.csv")
+    up_date = api.Contracts.Futures.TXF[
+        next(i for i in api.Contracts.Futures.TXF.keys())
+    ].update_date.replace("/", "-")
+    if today != up_date:
+        print("off-day")
+        return "off-day"
+    files = glob.glob(
+        "{}/*.csv".format(os.path.join(os.getenv("HOME"), "shioaji_history"))
+    )
     exist_code = []
     for i in files:
         exist_code.append(i.split("/")[-1].split(".")[0])
