@@ -1,9 +1,27 @@
 import os
 import argparse
+import json
 import time
 import glob
 import requests
 from lxml import etree
+
+
+
+def line_broadcast(pid):
+    with open('line_config.json', 'r') as f:
+        config = json.load(f)
+    f.close()
+    url = "https://api.line.me/v2/bot/message/broadcast"
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {}'.format(config['token'])
+    }
+    page = "http://www.alberthsueh.com/phpBB2/viewtopic.php?t={0}".format(pid)
+    payload = json.dumps({"messages":[{"type":"text", "text":"{0}".format(page)}]})
+    requests.request(
+        "POST", url, headers=headers,
+        data=payload)
 
 
 def parse_args():
@@ -66,7 +84,9 @@ def main():
             with open(path, "wb") as f:
                 f.write(response.content)
             f.close()
+            line_broadcast(pid)
             time.sleep(1)
+
         except:
             print("{} is bad".format(pid))
 
