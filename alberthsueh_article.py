@@ -9,7 +9,8 @@ from lxml import etree
 
 
 def line_broadcast(pid):
-    with open('line_config.json', 'r') as f:
+    path = os.path.join(os.getenv("HOME"), "invest_data", "line_config.json")
+    with open(path, 'r') as f:
         config = json.load(f)
     f.close()
     url = "https://api.line.me/v2/bot/message/broadcast"
