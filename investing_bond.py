@@ -23,8 +23,8 @@ def main():
     parser.add_argument("-c", "--country", help="enter a country", type=str)
     args = parser.parse_args()
     country = args.country.lower()
-    country.replace(' ', '-')
     country_bond = get_last_bond(country)
+    country = country.replace(' ', '-')
     country_bond.to_csv('investing/{}_bond.csv'.format(country), index=False, header=False, mode='a')
 
 if __name__ == '__main__':
